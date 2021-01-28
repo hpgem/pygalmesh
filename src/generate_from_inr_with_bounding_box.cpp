@@ -76,7 +76,7 @@ bool add_bounding_box(const CGAL::Image_3& image,
   return true;
 
 }
-
+void 
 generate_from_inr_with_bounding_box(
     const std::string & inr_filename,
     const std::string & outfile,
@@ -108,8 +108,10 @@ generate_from_inr_with_bounding_box(
     Mesh_domain cgal_domain = Mesh_domain::create_labeled_image_mesh_domain(image);
 
     // add features
-    const bool success = add_bounding_box(image, cgal_domain)
-
+    const bool success_box = add_bounding_box(image, cgal_domain);
+    if (!success_box) {
+        throw "Could not add bounding box constraint";
+    }
 
     Mesh_criteria criteria(
       CGAL::parameters::edge_size=max_edge_size_at_feature_edges,

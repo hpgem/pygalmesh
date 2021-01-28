@@ -163,8 +163,4 @@ generate_from_inr_with_subdomain_sizing(
 }
 
 
-void generate_from_inr_with_subdomain_sizing_and_bounding_box(
-
-)
-
 } // namespace pygalmesh

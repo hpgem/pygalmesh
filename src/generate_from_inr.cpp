@@ -21,6 +21,7 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 
 typedef CGAL::Labeled_mesh_domain_3<K> Mesh_domain;
 
+
 // Triangulation
 typedef CGAL::Mesh_triangulation_3<Mesh_domain>::type Tr;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
@@ -160,5 +161,10 @@ generate_from_inr_with_subdomain_sizing(
   medit_file.close();
   return;
 }
+
+
+void generate_from_inr_with_subdomain_sizing_and_bounding_box(
+
+)
 
 } // namespace pygalmesh

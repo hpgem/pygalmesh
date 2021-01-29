@@ -3,6 +3,7 @@
 #include "generate_2d.hpp"
 #include "generate_from_off.hpp"
 #include "generate_from_inr.hpp"
+#include "generate_from_inr_with_bounding_box.hpp"
 #include "remesh_surface.hpp"
 #include "generate_periodic.hpp"
 #include "generate_surface_mesh.hpp"
@@ -339,6 +340,23 @@ PYBIND11_MODULE(_pygalmesh, m) {
         );
     m.def(
         "_generate_from_inr", &generate_from_inr,
+        py::arg("inr_filename"),
+        py::arg("outfile"),
+        py::arg("lloyd") = false,
+        py::arg("odt") = false,
+        py::arg("perturb") = true,
+        py::arg("exude") = true,
+        py::arg("max_edge_size_at_feature_edges") = 0.0,
+        py::arg("min_facet_angle") = 0.0,
+        py::arg("max_radius_surface_delaunay_ball") = 0.0,
+        py::arg("max_facet_distance") = 0.0,
+        py::arg("max_circumradius_edge_ratio") = 0.0,
+        py::arg("max_cell_circumradius") = 0.0,
+        py::arg("verbose") = true,
+        py::arg("seed") = 0
+        );
+    m.def(
+        "_generate_from_inr_with_bounding_box", &generate_from_inr_with_bounding_box,
         py::arg("inr_filename"),
         py::arg("outfile"),
         py::arg("lloyd") = false,

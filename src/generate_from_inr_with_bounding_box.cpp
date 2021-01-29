@@ -35,32 +35,6 @@ typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
 typedef CGAL::Mesh_constant_domain_field_3<Mesh_domain::R,
                                            Mesh_domain::Index> Sizing_field_cell;
 
-// Protect the intersection of the object with the box of the image,
-// by declaring 1D-features. Note that `CGAL::polylines_to_protect` is
-// not documented.
-// bool add_1D_features(const CGAL::Image_3& image,
-//                      Mesh_domain& domain,
-//                      const char* lines_fname)
-// {
-//   typedef K::Point_3 Point_3;
-//   typedef unsigned char Word_type;
-//   std::vector<std::vector<Point_3> > features_inside;
-//   if(!read_polylines(lines_fname, features_inside)) // see file "read_polylines.h"
-//   {
-//     std::cerr << "Error: Cannot read file " <<  lines_fname << std::endl;
-//     return false;
-//   }
-//   std::vector<std::vector<Point_3> > polylines_on_bbox;
-//   CGAL::polylines_to_protect<Point_3, Word_type>(image, polylines_on_bbox);
-//                                                  features_inside.begin(),
-//                                                  features_inside.end());
-//   domain.add_features(polylines_on_bbox.begin(), polylines_on_bbox.end());
-//   // It is very important that the polylines from the file `lines_fname`
-//   // contain only polylines in the inside of the box of the image.
-//   domain.add_features(features_inside.begin(), features_inside.end());
-//   return true;
-// }
-
 bool add_bounding_box(const CGAL::Image_3& image,
                       Mesh_domain& domain)
 {
@@ -137,6 +111,7 @@ generate_from_inr_with_bounding_box(
         perturb ? CGAL::parameters::perturb() : CGAL::parameters::no_perturb(),
         exude ? CGAL::parameters::exude() : CGAL::parameters::no_exude()
         );
+        
     if (!verbose) {
         std::cerr.clear();
     }
@@ -150,5 +125,5 @@ generate_from_inr_with_bounding_box(
 }
 
 
-}
+} // namespace pygalmesh
 

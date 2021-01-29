@@ -9,6 +9,7 @@ from _pygalmesh import (
     _generate_2d,
     _generate_from_inr,
     _generate_from_inr_with_subdomain_sizing,
+    _generate_from_inr_with_bounding_box,
     _generate_from_off,
     _generate_mesh,
     _generate_periodic_mesh,
@@ -291,13 +292,20 @@ def generate_from_inr(
     max_circumradius_edge_ratio=0.0,
     max_cell_circumradius=0.0,
     verbose=True,
+    bounding_box=False,
     seed=0,
 ):
     fh, outfile = tempfile.mkstemp(suffix=".mesh")
     os.close(fh)
 
     if isinstance(max_cell_circumradius, float):
-        _generate_from_inr(
+        
+        if bounding_box:
+            _generate_fct = _generate_from_inr_with_bounding_box
+        else:
+            _generate_fct = _generate_from_inr
+
+        _generate_fct(
             inr_filename,
             outfile,
             lloyd=lloyd,
@@ -322,6 +330,11 @@ def generate_from_inr(
 
         max_cell_circumradiuss = list(max_cell_circumradius.values())
         subdomain_labels = list(max_cell_circumradius.keys())
+
+        if bounding_box:
+            raise ValueError("Bounding Box + subdomain sizing not implemented")
+        else:
+            _generate_fct = _generate_from_inr_with_subdomain_sizing
 
         _generate_from_inr_with_subdomain_sizing(
             inr_filename,
@@ -425,12 +438,14 @@ def generate_from_array(
     max_facet_distance=0.0,
     max_circumradius_edge_ratio=0.0,
     verbose=True,
+    bounding_box=False,
     seed=0,
 ):
     assert vol.dtype in ["uint8", "uint16"]
     fh, inr_filename = tempfile.mkstemp(suffix=".inr")
     os.close(fh)
     save_inr(vol, h, inr_filename)
+
     mesh = generate_from_inr(
         inr_filename,
         lloyd,
@@ -444,7 +459,9 @@ def generate_from_array(
         max_circumradius_edge_ratio,
         max_cell_circumradius,
         verbose,
+        bounding_box,
         seed,
     )
+    
     os.remove(inr_filename)
     return mesh

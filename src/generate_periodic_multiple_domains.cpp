@@ -102,9 +102,6 @@ generate_periodic_mesh_multiple_domains(
     std::vector<Periodic_function> funcs;
     funcs.push_back(Periodic_function(d1, cuboid)); 
     funcs.push_back(Periodic_function(d2, cuboid));
-    // std::vector<std::function<double(K::Point_3)>> funcs;
-    // funcs.push_back(d1);
-    // funcs.push_back(d2);
 
   // The vector of vectors of sign is passed as a vector of strings (since a string
   // is a vector of chars)

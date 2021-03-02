@@ -12,6 +12,7 @@ namespace pygalmesh {
 void generate_periodic_mesh_multiple_domains(
     const std::shared_ptr<pygalmesh::DomainBase> & domain1,
     const std::shared_ptr<pygalmesh::DomainBase> & domain2,
+    const std::vector<std::string> vps,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
     const bool lloyd = false,

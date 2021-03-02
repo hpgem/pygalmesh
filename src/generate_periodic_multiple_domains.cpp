@@ -60,6 +60,7 @@ void
 generate_periodic_mesh_multiple_domains(
     const std::shared_ptr<pygalmesh::DomainBase> & domain1,
     const std::shared_ptr<pygalmesh::DomainBase> & domain2,
+    const std::vector<std::string> vps,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
     const bool lloyd,
@@ -105,9 +106,9 @@ generate_periodic_mesh_multiple_domains(
 
   // The vector of vectors of sign is passed as a vector of strings (since a string
   // is a vector of chars)
-  std::vector<std::string> vps;
-  vps.push_back("-+");
-  vps.push_back("+-");
+  //   std::vector<std::string> vps;
+  //   vps.push_back("--");
+  //   vps.push_back("-+");
 
   Multi_domain_wrapper multi_domain_function(funcs, vps);
   Periodic_mesh_domain domain(multi_domain_function, cuboid);

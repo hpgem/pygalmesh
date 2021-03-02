@@ -14,6 +14,7 @@ from _pygalmesh import (
     _generate_from_off,
     _generate_mesh,
     _generate_periodic_mesh,
+    _generate_periodic_mesh_multiple_domains,
     _generate_surface_mesh,
     _remesh_surface,
 )
@@ -206,6 +207,7 @@ def generate_periodic_mesh(
 def generate_periodic_mesh_multiple_domains(
     domain1,
     domain2,
+    signs,
     bounding_cuboid,
     lloyd=False,
     odt=False,
@@ -226,9 +228,10 @@ def generate_periodic_mesh_multiple_domains(
 
     assert number_of_copies_in_output in [1, 2, 4, 8]
 
-    _generate_periodic_mesh(
+    _generate_periodic_mesh_multiple_domains(
         domain1,
         domain2,
+        signs,
         outfile,
         bounding_cuboid,
         lloyd=lloyd,

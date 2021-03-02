@@ -203,6 +203,54 @@ def generate_periodic_mesh(
     return mesh
 
 
+def generate_periodic_mesh_multiple_domains(
+    domain1,
+    domain2,
+    bounding_cuboid,
+    lloyd=False,
+    odt=False,
+    perturb=True,
+    exude=True,
+    max_edge_size_at_feature_edges=0.0,
+    min_facet_angle=0.0,
+    max_radius_surface_delaunay_ball=0.0,
+    max_facet_distance=0.0,
+    max_circumradius_edge_ratio=0.0,
+    max_cell_circumradius=0.0,
+    number_of_copies_in_output=1,
+    verbose=True,
+    seed=0,
+):
+    fh, outfile = tempfile.mkstemp(suffix=".mesh")
+    os.close(fh)
+
+    assert number_of_copies_in_output in [1, 2, 4, 8]
+
+    _generate_periodic_mesh(
+        domain1,
+        domain2,
+        outfile,
+        bounding_cuboid,
+        lloyd=lloyd,
+        odt=odt,
+        perturb=perturb,
+        exude=exude,
+        max_edge_size_at_feature_edges=max_edge_size_at_feature_edges,
+        min_facet_angle=min_facet_angle,
+        max_radius_surface_delaunay_ball=max_radius_surface_delaunay_ball,
+        max_facet_distance=max_facet_distance,
+        max_circumradius_edge_ratio=max_circumradius_edge_ratio,
+        max_cell_circumradius=max_cell_circumradius,
+        number_of_copies_in_output=number_of_copies_in_output,
+        verbose=verbose,
+        seed=seed,
+    )
+
+    mesh = meshio.read(outfile)
+    os.remove(outfile)
+    return mesh
+
+
 def generate_surface_mesh(
     domain,
     bounding_sphere_radius=0.0,
@@ -338,7 +386,7 @@ def generate_from_inr(
         else:
             _generate_fct = _generate_from_inr_with_subdomain_sizing
 
-        _generate_from_inr_with_subdomain_sizing(
+        _generate_fct(
             inr_filename,
             outfile,
             default_max_cell_circumradius,

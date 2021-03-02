@@ -1,6 +1,7 @@
 import os
 
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from pybind11.setup_helpers import (Pybind11Extension, build_ext,
+                                    ParallelCompile, naive_recompile)
 from setuptools import setup
 
 # https://github.com/pybind/python_example/
@@ -17,6 +18,7 @@ ext_modules = [
                 "src/generate_from_inr_with_bounding_box.cpp",
                 "src/generate_from_off.cpp",
                 "src/generate_periodic.cpp",
+                "src/generate_periodic_multiple_domains.cpp",
                 "src/generate_surface_mesh.cpp",
                 "src/remesh_surface.cpp",
                 "src/pybind11.cpp",
@@ -29,6 +31,8 @@ ext_modules = [
 ]
 
 if __name__ == "__main__":
+
+    ParallelCompile("NPY_NUM_BUILD_JOBS", needs_recompile=naive_recompile).install()
     setup(
         cmdclass={"build_ext": build_ext},
         ext_modules=ext_modules,

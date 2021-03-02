@@ -6,6 +6,7 @@
 #include "generate_from_inr_with_bounding_box.hpp"
 #include "remesh_surface.hpp"
 #include "generate_periodic.hpp"
+#include "generate_periodic_multiple_domains.hpp"
 #include "generate_surface_mesh.hpp"
 #include "polygon2d.hpp"
 #include "primitives.hpp"
@@ -293,6 +294,26 @@ PYBIND11_MODULE(_pygalmesh, m) {
     m.def(
         "_generate_periodic_mesh", &generate_periodic_mesh,
         py::arg("domain"),
+        py::arg("outfile"),
+        py::arg("bounding_cuboid"),
+        py::arg("lloyd") = false,
+        py::arg("odt") = false,
+        py::arg("perturb") = true,
+        py::arg("exude") = true,
+        py::arg("max_edge_size_at_feature_edges") = 0.0,
+        py::arg("min_facet_angle") = 0.0,
+        py::arg("max_radius_surface_delaunay_ball") = 0.0,
+        py::arg("max_facet_distance") = 0.0,
+        py::arg("max_circumradius_edge_ratio") = 0.0,
+        py::arg("max_cell_circumradius") = 0.0,
+        py::arg("number_of_copies_in_output") = 1,
+        py::arg("verbose") = true,
+        py::arg("seed") = 0
+        );
+    m.def(
+        "_generate_periodic_mesh_multiple_domains", &generate_periodic_mesh_multiple_domains,
+        py::arg("domain1"),
+        py::arg("domain2"),
         py::arg("outfile"),
         py::arg("bounding_cuboid"),
         py::arg("lloyd") = false,

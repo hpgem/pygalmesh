@@ -1,6 +1,6 @@
 #define CGAL_MESH_3_VERBOSE 1
 
-#include "generate_periodic.hpp"
+#include "generate_periodic_multiple_domains.hpp"
 
 #include <CGAL/Periodic_3_mesh_3/config.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -8,6 +8,8 @@
 #include <CGAL/optimize_periodic_3_mesh_3.h>
 #include <CGAL/Periodic_3_mesh_3/IO/File_medit.h>
 #include <CGAL/Periodic_3_mesh_triangulation_3.h>
+#include <CGAL/Periodic_3_function_wrapper.h>
+#include <CGAL/Implicit_to_labeling_function_wrapper.h>
 #include <CGAL/Labeled_mesh_domain_3.h>
 #include <CGAL/Mesh_complex_3_in_triangulation_3.h>
 #include <CGAL/Mesh_criteria_3.h>
@@ -19,21 +21,30 @@
 
 namespace pygalmesh {
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+// typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+// typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
 
-typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
+// // Triangulation
+// typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
+// typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
 
-// Triangulation
-typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
-typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
 
+
+// Kernel
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::FT                                               FT;
 typedef K::Point_3                                          Point;
 typedef K::Iso_cuboid_3                                     Iso_cuboid;
+
 // Domain
-typedef FT (Function)(const Point&);
+typedef FT (*Function)(const Point&);
+
+// This wrapper is needed to make 'sphere_function' periodic.
+typedef CGAL::Periodic_3_function_wrapper<std::function<double(K::Point_3)>, K>      Periodic_function;
+typedef CGAL::Implicit_multi_domain_to_labeling_function_wrapper<Periodic_function> Multi_domain_wrapper;
+
 typedef CGAL::Labeled_mesh_domain_3<K>                      Periodic_mesh_domain;
+
 // Triangulation
 typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
@@ -41,13 +52,14 @@ typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
 // Criteria
 typedef CGAL::Mesh_criteria_3<Tr>                           Periodic_mesh_criteria;
 
-// To avoid verbose function and named parameters call
 
+// To avoid verbose function and named parameters call
 using namespace CGAL::parameters;
 
 void
-generate_periodic_mesh(
-    const std::shared_ptr<pygalmesh::DomainBase> & domain,
+generate_periodic_mesh_multiple_domains(
+    const std::shared_ptr<pygalmesh::DomainBase> & domain1,
+    const std::shared_ptr<pygalmesh::DomainBase> & domain2,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
     const bool lloyd,
@@ -77,11 +89,31 @@ generate_periodic_mesh(
       );
 
   // wrap domain
-  const auto d = [&](K::Point_3 p) {
-    return domain->eval({p.x(), p.y(), p.z()});
+   const auto d1 = [&](K::Point_3 p) {
+    return domain1->eval({p.x(), p.y(), p.z()});
   };
-  Periodic_mesh_domain cgal_domain =
-    Periodic_mesh_domain::create_implicit_mesh_domain(d, cuboid);
+
+   const auto d2 = [&](K::Point_3 p) {
+    return domain2->eval({p.x(), p.y(), p.z()});
+  };
+
+  // create a vector of periodic functions from
+  // wrapped domains
+    std::vector<Periodic_function> funcs;
+    funcs.push_back(Periodic_function(d1, cuboid)); 
+    funcs.push_back(Periodic_function(d2, cuboid));
+    // std::vector<std::function<double(K::Point_3)>> funcs;
+    // funcs.push_back(d1);
+    // funcs.push_back(d2);
+
+  // The vector of vectors of sign is passed as a vector of strings (since a string
+  // is a vector of chars)
+  std::vector<std::string> vps;
+  vps.push_back("-+");
+  vps.push_back("+-");
+
+  Multi_domain_wrapper multi_domain_function(funcs, vps);
+  Periodic_mesh_domain domain(multi_domain_function, cuboid);
 
   Periodic_mesh_criteria criteria(
       CGAL::parameters::edge_size=max_edge_size_at_feature_edges,
@@ -98,7 +130,7 @@ generate_periodic_mesh(
     std::cerr.setstate(std::ios_base::failbit);
   }
   C3t3 c3t3 = CGAL::make_periodic_3_mesh_3<C3t3>(
-      cgal_domain,
+      domain,
       criteria,
       lloyd ? CGAL::parameters::lloyd() : CGAL::parameters::no_lloyd(),
       odt ? CGAL::parameters::odt() : CGAL::parameters::no_odt(),

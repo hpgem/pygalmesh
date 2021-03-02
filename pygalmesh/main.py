@@ -8,8 +8,9 @@ from _pygalmesh import (
     SizingFieldBase,
     _generate_2d,
     _generate_from_inr,
-    _generate_from_inr_with_subdomain_sizing,
     _generate_from_inr_with_bounding_box,
+    _generate_from_inr_with_subdomain_sizing,
+    _generate_from_inr_with_subdomain_sizing_and_bounding_box,
     _generate_from_off,
     _generate_mesh,
     _generate_periodic_mesh,
@@ -331,8 +332,9 @@ def generate_from_inr(
         max_cell_circumradiuss = list(max_cell_circumradius.values())
         subdomain_labels = list(max_cell_circumradius.keys())
 
+
         if bounding_box:
-            raise ValueError("Bounding Box + subdomain sizing not implemented")
+            _generate_fct = _generate_from_inr_with_subdomain_sizing_and_bounding_box
         else:
             _generate_fct = _generate_from_inr_with_subdomain_sizing
 

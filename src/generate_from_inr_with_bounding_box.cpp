@@ -111,7 +111,7 @@ generate_from_inr_with_bounding_box(
         perturb ? CGAL::parameters::perturb() : CGAL::parameters::no_perturb(),
         exude ? CGAL::parameters::exude() : CGAL::parameters::no_exude()
         );
-        
+
     if (!verbose) {
         std::cerr.clear();
     }
@@ -122,6 +122,81 @@ generate_from_inr_with_bounding_box(
     medit_file.close();
     return;
 
+}
+
+
+void
+generate_from_inr_with_subdomain_sizing_and_bounding_box(
+    const std::string & inr_filename,
+    const std::string & outfile,
+    const double default_max_cell_circumradius,
+    const std::vector<double> & max_cell_circumradiuss,
+    const std::vector<int> & cell_labels,
+    const bool lloyd,
+    const bool odt,
+    const bool perturb,
+    const bool exude,
+    const double max_edge_size_at_feature_edges,
+    const double min_facet_angle,
+    const double max_radius_surface_delaunay_ball,
+    const double max_facet_distance,
+    const double max_circumradius_edge_ratio,
+    const bool verbose,
+    const int seed
+    )
+{
+    CGAL::get_default_random() = CGAL::Random(seed);
+
+    CGAL::Image_3 image;
+    const bool success = image.read(inr_filename.c_str());
+    if (!success) {
+        throw "Could not read image file";
+    }
+    Mesh_domain cgal_domain = Mesh_domain::create_labeled_image_mesh_domain(image);
+
+    // add features
+    const bool success_box = add_bounding_box(image, cgal_domain);
+    if (!success_box) {
+        throw "Could not add bounding box constraint";
+    }
+
+    Sizing_field_cell max_cell_circumradius(default_max_cell_circumradius);
+    const int ndimensions = 3;
+    for(std::vector<double>::size_type i(0); i < max_cell_circumradiuss.size(); ++i)
+        max_cell_circumradius.set_size(max_cell_circumradiuss[i], ndimensions, cgal_domain.index_from_subdomain_index(cell_labels[i]));
+
+    Mesh_criteria criteria(
+        CGAL::parameters::edge_size=max_edge_size_at_feature_edges,
+        CGAL::parameters::facet_angle=min_facet_angle,
+        CGAL::parameters::facet_size=max_radius_surface_delaunay_ball,
+        CGAL::parameters::facet_distance=max_facet_distance,
+        CGAL::parameters::cell_radius_edge_ratio=max_circumradius_edge_ratio,
+        CGAL::parameters::cell_size=max_cell_circumradius
+        );
+
+    // Mesh generation
+    if (!verbose) {
+        // suppress output
+        std::cerr.setstate(std::ios_base::failbit);
+    }
+    C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(
+        cgal_domain,
+        criteria,
+        lloyd ? CGAL::parameters::lloyd() : CGAL::parameters::no_lloyd(),
+        odt ? CGAL::parameters::odt() : CGAL::parameters::no_odt(),
+        perturb ? CGAL::parameters::perturb() : CGAL::parameters::no_perturb(),
+        exude ? CGAL::parameters::exude() : CGAL::parameters::no_exude()
+        );
+        
+    if (!verbose) {
+        std::cerr.clear();
+    }
+
+    // Output
+    std::ofstream medit_file(outfile);
+    c3t3.output_to_medit(medit_file);
+    medit_file.close();
+    return;
 }
 
 

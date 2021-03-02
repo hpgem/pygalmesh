@@ -52,14 +52,15 @@ typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
 // Criteria
 typedef CGAL::Mesh_criteria_3<Tr>                           Periodic_mesh_criteria;
 
+// domains
+// typedef std::shared_ptr<pygalmesh::DomainBase> domain;
 
 // To avoid verbose function and named parameters call
 using namespace CGAL::parameters;
 
 void
 generate_periodic_mesh_multiple_domains(
-    const std::shared_ptr<pygalmesh::DomainBase> & domain1,
-    const std::shared_ptr<pygalmesh::DomainBase> & domain2,
+    const std::vector<std::shared_ptr<pygalmesh::DomainBase>> domains,
     const std::vector<std::string> vps,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
@@ -79,6 +80,7 @@ generate_periodic_mesh_multiple_domains(
     )
 {
   CGAL::get_default_random() = CGAL::Random(seed);
+  const int ndomains = domains.size();
 
   K::Iso_cuboid_3 cuboid(
       bounding_cuboid[0],
@@ -89,26 +91,71 @@ generate_periodic_mesh_multiple_domains(
       bounding_cuboid[5]
       );
 
-  // wrap domain
-   const auto d1 = [&](K::Point_3 p) {
-    return domain1->eval({p.x(), p.y(), p.z()});
+
+//    std::vector<std::function<double(K::Point_3)>> ds[domains.size()]; 
+//    std::vector<Periodic_function> funcs;
+//    for (int id=0; id<domains.size(); id++)
+//    {
+//        const double ds[id] = [&](K::Point_3 p){
+//            return domains[id]->eval({p.x(), p.y(), p.z()});
+//        }
+//        funcs.push_back(Periodic_function(ds[id], cuboid));
+//    }  
+
+  std::vector<Periodic_function> funcs;
+  // wrap the domains
+  const auto d0 = [&](K::Point_3 p) {
+    return domains[0]->eval({p.x(), p.y(), p.z()});
   };
+  funcs.push_back(Periodic_function(d0, cuboid));
 
-   const auto d2 = [&](K::Point_3 p) {
-    return domain2->eval({p.x(), p.y(), p.z()});
+  const auto d1 = [&](K::Point_3 p) {
+    return domains[1]->eval({p.x(), p.y(), p.z()});
   };
+  funcs.push_back(Periodic_function(d1, cuboid));
 
-  // create a vector of periodic functions from
-  // wrapped domains
-    std::vector<Periodic_function> funcs;
-    funcs.push_back(Periodic_function(d1, cuboid)); 
-    funcs.push_back(Periodic_function(d2, cuboid));
+  if(ndomains>2){
+    const auto d2 = [&](K::Point_3 p) {
+        return domains[2]->eval({p.x(), p.y(), p.z()});
+    };
+    funcs.push_back(Periodic_function(d2, cuboid));      
+  }
 
-  // The vector of vectors of sign is passed as a vector of strings (since a string
-  // is a vector of chars)
-  //   std::vector<std::string> vps;
-  //   vps.push_back("--");
-  //   vps.push_back("-+");
+  else if(ndomains>3){
+    const auto d3 = [&](K::Point_3 p) {
+        return domains[3]->eval({p.x(), p.y(), p.z()});
+    };
+    funcs.push_back(Periodic_function(d3, cuboid));      
+  }
+  
+  else if(ndomains>4){
+    const auto d4 = [&](K::Point_3 p) {
+        return domains[4]->eval({p.x(), p.y(), p.z()});
+    };
+    funcs.push_back(Periodic_function(d4, cuboid));      
+  }
+
+  else if(ndomains>5){
+    const auto d5 = [&](K::Point_3 p) {
+        return domains[5]->eval({p.x(), p.y(), p.z()});
+    };
+    funcs.push_back(Periodic_function(d5, cuboid));      
+  }
+
+  else if(ndomains>6){
+    const auto d6 = [&](K::Point_3 p) {
+        return domains[6]->eval({p.x(), p.y(), p.z()});
+    };
+    funcs.push_back(Periodic_function(d6, cuboid));      
+  }
+
+  else if(ndomains>7){
+    const auto d7 = [&](K::Point_3 p) {
+        return domains[7]->eval({p.x(), p.y(), p.z()});
+    };
+    funcs.push_back(Periodic_function(d7, cuboid));      
+  }
+
 
   Multi_domain_wrapper multi_domain_function(funcs, vps);
   Periodic_mesh_domain domain(multi_domain_function, cuboid);

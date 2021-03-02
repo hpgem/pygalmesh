@@ -312,8 +312,7 @@ PYBIND11_MODULE(_pygalmesh, m) {
         );
     m.def(
         "_generate_periodic_mesh_multiple_domains", &generate_periodic_mesh_multiple_domains,
-        py::arg("domain1"),
-        py::arg("domain2"),
+        py::arg("domains"),
         py::arg("signs"),
         py::arg("outfile"),
         py::arg("bounding_cuboid"),

@@ -56,8 +56,7 @@ def test_schwarz_ball():
             return numpy.linalg.norm(x-numpy.array([0.5]*3)) - 0.15
 
     mesh = pygalmesh.generate_periodic_mesh_multiple_domains(
-        Schwarz(),
-        Ball(),
+        [Schwarz(),Ball()],
         ["--","-+"],
         [0, 0, 0, 1, 1, 1],
         max_cell_circumradius=0.05,

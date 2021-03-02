@@ -27,6 +27,12 @@ typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
 typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
 
+// Mesh Criteria
+typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
+typedef Mesh_criteria::Facet_criteria Facet_criteria;
+typedef Mesh_criteria::Cell_criteria Cell_criteria;
+
+
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::FT                                               FT;
 typedef K::Point_3                                          Point;
@@ -37,12 +43,9 @@ typedef CGAL::Labeled_mesh_domain_3<K>                      Periodic_mesh_domain
 // Triangulation
 typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
-
 // Criteria
 typedef CGAL::Mesh_criteria_3<Tr>                           Periodic_mesh_criteria;
-
 // To avoid verbose function and named parameters call
-
 using namespace CGAL::parameters;
 
 void
@@ -83,7 +86,7 @@ generate_periodic_mesh(
   Periodic_mesh_domain cgal_domain =
     Periodic_mesh_domain::create_implicit_mesh_domain(d, cuboid);
 
-  Periodic_mesh_criteria criteria(
+  Mesh_criteria criteria(
       CGAL::parameters::edge_size=max_edge_size_at_feature_edges,
       CGAL::parameters::facet_angle=min_facet_angle,
       CGAL::parameters::facet_size=max_radius_surface_delaunay_ball,

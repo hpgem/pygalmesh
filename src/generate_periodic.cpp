@@ -13,6 +13,7 @@
 #include <CGAL/Mesh_complex_3_in_triangulation_3.h>
 #include <CGAL/Mesh_criteria_3.h>
 #include <CGAL/number_type_config.h> // CGAL_PI
+#include <CGAL/Mesh_domain_with_polyline_features_3.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -20,9 +21,12 @@
 
 namespace pygalmesh {
 
+// Kernel
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 
-typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
+// Domain
+// typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
+typedef CGAL::Mesh_domain_with_polyline_features_3<CGAL::Labeled_mesh_domain_3<K>> Periodic_mesh_domain;
 
 // Triangulation
 typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
@@ -39,19 +43,32 @@ typedef K::FT                                               FT;
 typedef K::Point_3                                          Point;
 typedef K::Iso_cuboid_3                                     Iso_cuboid;
 
-// Domain
+// Periodic function
 typedef FT (Function)(const Point&);
-typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
 typedef CGAL::Periodic_3_function_wrapper<std::function<double(K::Point_3)>, K> Periodic_function;
 
-// Triangulation
-typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
-typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
 // Criteria
 typedef CGAL::Mesh_criteria_3<Tr>                           Periodic_mesh_criteria;
 // To avoid verbose function and named parameters call
 using namespace CGAL::parameters;
 
+
+// translate vector<vector<array<double, 3>> to list<vector<Point_3>>
+std::list<std::vector<K::Point_3>>
+translate_feature_edges_periodic(
+    const std::vector<std::vector<std::array<double, 3>>> & feature_edges
+    )
+{
+  std::list<std::vector<K::Point_3>> polylines;
+  for (const auto & feature_edge: feature_edges) {
+    std::vector<K::Point_3> polyline;
+    for (const auto & point: feature_edge) {
+      polyline.push_back(K::Point_3(point[0], point[1], point[2]));
+    }
+    polylines.push_back(polyline);
+  }
+  return polylines;
+}
 
 Periodic_mesh_domain 
 create_mesh(
@@ -72,6 +89,7 @@ generate_periodic_mesh(
     const std::shared_ptr<pygalmesh::DomainBase> & domain,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
+    const std::vector<std::vector<std::array<double, 3>>> & extra_feature_edges,
     const bool lloyd,
     const bool odt,
     const bool perturb,
@@ -104,17 +122,11 @@ generate_periodic_mesh(
     return domain->eval({p.x(), p.y(), p.z()});
   };
 
-  // // create the periodic mesh domain
-  // if(make_periodic){
-  //   Periodic_mesh_domain cgal_domain =
-  //     Periodic_mesh_domain::create_implicit_mesh_domain(Periodic_function(d, cuboid), cuboid);  
-  // }
-  // else {
-  //   Periodic_mesh_domain cgal_domain =
-  //     Periodic_mesh_domain::create_implicit_mesh_domain(d, cuboid);
-  // }
   
   Periodic_mesh_domain cgal_domain = create_mesh(d, cuboid, make_periodic);
+
+  const auto polylines = translate_feature_edges_periodic(extra_feature_edges);
+  cgal_domain.add_features(polylines.begin(), polylines.end());
 
   Mesh_criteria criteria(
       CGAL::parameters::edge_size=max_edge_size_at_feature_edges,

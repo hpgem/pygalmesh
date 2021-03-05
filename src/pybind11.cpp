@@ -296,6 +296,7 @@ PYBIND11_MODULE(_pygalmesh, m) {
         py::arg("domain"),
         py::arg("outfile"),
         py::arg("bounding_cuboid"),
+        py::arg("extra_feature_edges") = std::vector<std::vector<std::array<double, 3>>>(),
         py::arg("lloyd") = false,
         py::arg("odt") = false,
         py::arg("perturb") = true,

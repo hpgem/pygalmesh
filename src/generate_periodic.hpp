@@ -13,6 +13,7 @@ void generate_periodic_mesh(
     const std::shared_ptr<pygalmesh::DomainBase> & domain,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
+    const std::vector<std::vector<std::array<double, 3>>> & extra_feature_edges,
     const bool lloyd = false,
     const bool odt = false,
     const bool perturb = true,

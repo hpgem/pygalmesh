@@ -161,6 +161,7 @@ def generate_2d(
 def generate_periodic_mesh(
     domain,
     bounding_cuboid,
+    extra_feature_edges=None,
     lloyd=False,
     odt=False,
     perturb=True,
@@ -182,10 +183,13 @@ def generate_periodic_mesh(
 
     assert number_of_copies_in_output in [1, 2, 4, 8]
 
+    extra_feature_edges = [] if extra_feature_edges is None else extra_feature_edges
+
     _generate_periodic_mesh(
         domain,
         outfile,
         bounding_cuboid,
+        extra_feature_edges=extra_feature_edges,
         lloyd=lloyd,
         odt=odt,
         perturb=perturb,

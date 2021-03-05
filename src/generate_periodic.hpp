@@ -25,8 +25,15 @@ void generate_periodic_mesh(
     const double max_cell_circumradius = 0.0,
     const int number_of_copies_in_output = 1,
     const bool verbose = true,
+    const bool make_periodic = false,
     const int seed = 0
     );
+
+// create_mesh(
+//     std::function<double(K::Point_3)> d, 
+//     K::Iso_cuboid_3 cuboid, 
+//     bool periodic
+//     ); 
 
 } // namespace pygalmesh
 

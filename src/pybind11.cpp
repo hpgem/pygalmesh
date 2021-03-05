@@ -308,6 +308,7 @@ PYBIND11_MODULE(_pygalmesh, m) {
         py::arg("max_cell_circumradius") = 0.0,
         py::arg("number_of_copies_in_output") = 1,
         py::arg("verbose") = true,
+        py::arg("make_periodic") = false,
         py::arg("seed") = 0
         );
     m.def(

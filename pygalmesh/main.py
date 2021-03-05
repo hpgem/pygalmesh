@@ -173,14 +173,12 @@ def generate_periodic_mesh(
     max_cell_circumradius=0.0,
     number_of_copies_in_output=1,
     verbose=True,
-    outfile=None,
+    make_periodic=False,
     seed=0,
 ):
-    remove_file = False
-    if outfile is None:
-        fh, outfile = tempfile.mkstemp(suffix=".mesh")
-        os.close(fh)
-        remove_file = True
+
+    fh, outfile = tempfile.mkstemp(suffix=".mesh")
+    os.close(fh)
 
     assert number_of_copies_in_output in [1, 2, 4, 8]
 
@@ -200,13 +198,13 @@ def generate_periodic_mesh(
         max_cell_circumradius=max_cell_circumradius,
         number_of_copies_in_output=number_of_copies_in_output,
         verbose=verbose,
+        make_periodic=make_periodic,
         seed=seed,
     )
 
     mesh = meshio.read(outfile)
-
-    if remove_file:
-        os.remove(outfile)
+    os.remove(outfile)
+    
     return mesh
 
 

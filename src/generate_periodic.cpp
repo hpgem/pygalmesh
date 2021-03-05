@@ -8,6 +8,7 @@
 #include <CGAL/optimize_periodic_3_mesh_3.h>
 #include <CGAL/Periodic_3_mesh_3/IO/File_medit.h>
 #include <CGAL/Periodic_3_mesh_triangulation_3.h>
+#include <CGAL/Periodic_3_function_wrapper.h>
 #include <CGAL/Labeled_mesh_domain_3.h>
 #include <CGAL/Mesh_complex_3_in_triangulation_3.h>
 #include <CGAL/Mesh_criteria_3.h>
@@ -37,9 +38,12 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::FT                                               FT;
 typedef K::Point_3                                          Point;
 typedef K::Iso_cuboid_3                                     Iso_cuboid;
+
 // Domain
 typedef FT (Function)(const Point&);
-typedef CGAL::Labeled_mesh_domain_3<K>                      Periodic_mesh_domain;
+typedef CGAL::Labeled_mesh_domain_3<K> Periodic_mesh_domain;
+typedef CGAL::Periodic_3_function_wrapper<std::function<double(K::Point_3)>, K> Periodic_function;
+
 // Triangulation
 typedef CGAL::Periodic_3_mesh_triangulation_3<Periodic_mesh_domain>::type Tr;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
@@ -47,6 +51,21 @@ typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr>                       C3t3;
 typedef CGAL::Mesh_criteria_3<Tr>                           Periodic_mesh_criteria;
 // To avoid verbose function and named parameters call
 using namespace CGAL::parameters;
+
+
+Periodic_mesh_domain 
+create_mesh(
+  std::function<double(K::Point_3)> d, 
+  K::Iso_cuboid_3 cuboid, 
+  bool periodic) 
+{ 
+  if (periodic) {
+    return Periodic_mesh_domain::create_implicit_mesh_domain(Periodic_function(d, cuboid), cuboid);  
+  }
+  else {
+    return Periodic_mesh_domain::create_implicit_mesh_domain(d, cuboid);
+  }
+}
 
 void
 generate_periodic_mesh(
@@ -65,6 +84,7 @@ generate_periodic_mesh(
     const double max_cell_circumradius,
     const int number_of_copies_in_output,
     const bool verbose,
+    const bool make_periodic,
     const int seed
     )
 {
@@ -83,8 +103,18 @@ generate_periodic_mesh(
   const auto d = [&](K::Point_3 p) {
     return domain->eval({p.x(), p.y(), p.z()});
   };
-  Periodic_mesh_domain cgal_domain =
-    Periodic_mesh_domain::create_implicit_mesh_domain(d, cuboid);
+
+  // // create the periodic mesh domain
+  // if(make_periodic){
+  //   Periodic_mesh_domain cgal_domain =
+  //     Periodic_mesh_domain::create_implicit_mesh_domain(Periodic_function(d, cuboid), cuboid);  
+  // }
+  // else {
+  //   Periodic_mesh_domain cgal_domain =
+  //     Periodic_mesh_domain::create_implicit_mesh_domain(d, cuboid);
+  // }
+  
+  Periodic_mesh_domain cgal_domain = create_mesh(d, cuboid, make_periodic);
 
   Mesh_criteria criteria(
       CGAL::parameters::edge_size=max_edge_size_at_feature_edges,
@@ -100,6 +130,7 @@ generate_periodic_mesh(
     // suppress output
     std::cerr.setstate(std::ios_base::failbit);
   }
+
   C3t3 c3t3 = CGAL::make_periodic_3_mesh_3<C3t3>(
       cgal_domain,
       criteria,

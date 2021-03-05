@@ -1,5 +1,5 @@
-#ifndef GENERATE_PERIODIC_HPP
-#define GENERATE_PERIODIC_HPP
+#ifndef GENERATE_PERIODIC_MULTIPLE_DOMAINS_HPP
+#define GENERATE_PERIODIC_MULTIPLE_DOMAINS_HPP
 
 #include "domain.hpp"
 
@@ -9,8 +9,9 @@
 
 namespace pygalmesh {
 
-void generate_periodic_mesh(
-    const std::shared_ptr<pygalmesh::DomainBase> & domain,
+void generate_periodic_mesh_multiple_domains(
+    const std::vector<std::shared_ptr<pygalmesh::DomainBase>> domains,
+    const std::vector<std::string> vps,
     const std::string & outfile,
     const std::array<double, 6> bounding_cuboid,
     const bool lloyd = false,
@@ -25,16 +26,9 @@ void generate_periodic_mesh(
     const double max_cell_circumradius = 0.0,
     const int number_of_copies_in_output = 1,
     const bool verbose = true,
-    const bool make_periodic = false,
     const int seed = 0
     );
 
-// create_mesh(
-//     std::function<double(K::Point_3)> d, 
-//     K::Iso_cuboid_3 cuboid, 
-//     bool periodic
-//     ); 
-
 } // namespace pygalmesh
 
-#endif // GENERATE_PERIODIC_HPP
+#endif // GENERATE_PERIODIC_MULTIPLE_DOMAINS_HPP

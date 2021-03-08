@@ -125,6 +125,9 @@ generate_periodic_mesh(
   
   Periodic_mesh_domain cgal_domain = create_mesh(d, cuboid, make_periodic);
 
+  const auto native_features = translate_feature_edges_periodic(domain->get_features());
+  cgal_domain.add_features(native_features.begin(), native_features.end());
+
   const auto polylines = translate_feature_edges_periodic(extra_feature_edges);
   cgal_domain.add_features(polylines.begin(), polylines.end());
 

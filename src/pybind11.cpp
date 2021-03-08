@@ -3,7 +3,7 @@
 #include "generate_2d.hpp"
 #include "generate_from_off.hpp"
 #include "generate_from_inr.hpp"
-#include "generate_from_inr_with_bounding_box.hpp"
+#include "generate_from_inr_with_features.hpp"
 #include "remesh_surface.hpp"
 #include "generate_periodic.hpp"
 #include "generate_periodic_multiple_domains.hpp"
@@ -379,23 +379,6 @@ PYBIND11_MODULE(_pygalmesh, m) {
         py::arg("seed") = 0
         );
     m.def(
-        "_generate_from_inr_with_bounding_box", &generate_from_inr_with_bounding_box,
-        py::arg("inr_filename"),
-        py::arg("outfile"),
-        py::arg("lloyd") = false,
-        py::arg("odt") = false,
-        py::arg("perturb") = true,
-        py::arg("exude") = true,
-        py::arg("max_edge_size_at_feature_edges") = 0.0,
-        py::arg("min_facet_angle") = 0.0,
-        py::arg("max_radius_surface_delaunay_ball") = 0.0,
-        py::arg("max_facet_distance") = 0.0,
-        py::arg("max_circumradius_edge_ratio") = 0.0,
-        py::arg("max_cell_circumradius") = 0.0,
-        py::arg("verbose") = true,
-        py::arg("seed") = 0
-        );
-    m.def(
         "_generate_from_inr_with_subdomain_sizing", &generate_from_inr_with_subdomain_sizing,
         py::arg("inr_filename"),
         py::arg("outfile"),
@@ -415,12 +398,11 @@ PYBIND11_MODULE(_pygalmesh, m) {
         py::arg("seed") = 0
         );
     m.def(
-        "_generate_from_inr_with_subdomain_sizing_and_bounding_box", &generate_from_inr_with_subdomain_sizing_and_bounding_box,
+        "_generate_from_inr_with_features", &generate_from_inr_with_features,
         py::arg("inr_filename"),
         py::arg("outfile"),
-        py::arg("default_max_cell_circumradius"),
-        py::arg("max_cell_circumradiuss"),
-        py::arg("cell_labels"),
+        py::arg("extra_feature_edges") = std::vector<std::vector<std::array<double, 3>>>(),
+        py::arg("bbox_feature") = false,
         py::arg("lloyd") = false,
         py::arg("odt") = false,
         py::arg("perturb") = true,
@@ -430,9 +412,11 @@ PYBIND11_MODULE(_pygalmesh, m) {
         py::arg("max_radius_surface_delaunay_ball") = 0.0,
         py::arg("max_facet_distance") = 0.0,
         py::arg("max_circumradius_edge_ratio") = 0.0,
+        py::arg("max_cell_circumradius") = 0.0,
         py::arg("verbose") = true,
         py::arg("seed") = 0
         );
+
     m.def(
         "_remesh_surface", &remesh_surface,
         py::arg("infile"),

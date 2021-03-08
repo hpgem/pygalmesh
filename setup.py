@@ -15,7 +15,7 @@ ext_modules = [
                 "src/generate.cpp",
                 "src/generate_2d.cpp",
                 "src/generate_from_inr.cpp",
-                "src/generate_from_inr_with_bounding_box.cpp",
+                "src/generate_from_inr_with_features.cpp",
                 "src/generate_from_off.cpp",
                 "src/generate_periodic.cpp",
                 "src/generate_periodic_multiple_domains.cpp",

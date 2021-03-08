@@ -8,9 +8,8 @@ from _pygalmesh import (
     SizingFieldBase,
     _generate_2d,
     _generate_from_inr,
-    _generate_from_inr_with_bounding_box,
     _generate_from_inr_with_subdomain_sizing,
-    _generate_from_inr_with_subdomain_sizing_and_bounding_box,
+    _generate_from_inr_with_features,
     _generate_from_off,
     _generate_mesh,
     _generate_periodic_mesh,
@@ -349,6 +348,54 @@ def generate_volume_mesh_from_surface_mesh(
     os.remove(outfile)
     return mesh
 
+def generate_from_inr_with_features(
+    inr_filename,
+    extra_feature_edges = None,
+    bbox_feature = False,
+    lloyd=False,
+    odt=False,
+    perturb=True,
+    exude=True,
+    max_edge_size_at_feature_edges=0.0,
+    min_facet_angle=0.0,
+    max_radius_surface_delaunay_ball=0.0,
+    max_facet_distance=0.0,
+    max_circumradius_edge_ratio=0.0,
+    max_cell_circumradius=0.0,
+    verbose=True,
+    seed=0,
+):
+
+    extra_feature_edges = [] if extra_feature_edges is None else extra_feature_edges
+
+    fh, outfile = tempfile.mkstemp(suffix=".mesh")
+    os.close(fh)
+
+    assert isinstance(max_cell_circumradius, float)
+
+    _generate_from_inr_with_features(
+        inr_filename,
+        outfile,
+        extra_feature_edges=extra_feature_edges,
+        bbox_feature=bbox_feature,
+        lloyd=lloyd,
+        odt=odt,
+        perturb=perturb,
+        exude=exude,
+        max_edge_size_at_feature_edges=max_edge_size_at_feature_edges,
+        min_facet_angle=min_facet_angle,
+        max_radius_surface_delaunay_ball=max_radius_surface_delaunay_ball,
+        max_facet_distance=max_facet_distance,
+        max_circumradius_edge_ratio=max_circumradius_edge_ratio,
+        max_cell_circumradius=max_cell_circumradius,
+        verbose=verbose,
+        seed=seed,
+    )
+
+    mesh = meshio.read(outfile)
+    os.remove(outfile)
+    return mesh
+
 
 def generate_from_inr(
     inr_filename,
@@ -363,7 +410,6 @@ def generate_from_inr(
     max_circumradius_edge_ratio=0.0,
     max_cell_circumradius=0.0,
     verbose=True,
-    bounding_box=False,
     seed=0,
 ):
     fh, outfile = tempfile.mkstemp(suffix=".mesh")
@@ -371,12 +417,7 @@ def generate_from_inr(
 
     if isinstance(max_cell_circumradius, float):
         
-        if bounding_box:
-            _generate_fct = _generate_from_inr_with_bounding_box
-        else:
-            _generate_fct = _generate_from_inr
-
-        _generate_fct(
+        _generate_from_inr(
             inr_filename,
             outfile,
             lloyd=lloyd,
@@ -403,12 +444,7 @@ def generate_from_inr(
         subdomain_labels = list(max_cell_circumradius.keys())
 
 
-        if bounding_box:
-            _generate_fct = _generate_from_inr_with_subdomain_sizing_and_bounding_box
-        else:
-            _generate_fct = _generate_from_inr_with_subdomain_sizing
-
-        _generate_fct(
+        _generate_from_inr_with_subdomain_sizing(
             inr_filename,
             outfile,
             default_max_cell_circumradius,
@@ -499,6 +535,8 @@ def save_inr(vol, h, fname):
 def generate_from_array(
     vol,
     h,
+    extra_feature_edges = None,
+    bbox_feature = False,
     lloyd=False,
     odt=False,
     perturb=True,
@@ -510,7 +548,6 @@ def generate_from_array(
     max_facet_distance=0.0,
     max_circumradius_edge_ratio=0.0,
     verbose=True,
-    bounding_box=False,
     seed=0,
 ):
     assert vol.dtype in ["uint8", "uint16"]
@@ -518,22 +555,42 @@ def generate_from_array(
     os.close(fh)
     save_inr(vol, h, inr_filename)
 
-    mesh = generate_from_inr(
-        inr_filename,
-        lloyd,
-        odt,
-        perturb,
-        exude,
-        max_edge_size_at_feature_edges,
-        min_facet_angle,
-        max_radius_surface_delaunay_ball,
-        max_facet_distance,
-        max_circumradius_edge_ratio,
-        max_cell_circumradius,
-        verbose,
-        bounding_box,
-        seed,
-    )
-    
+    if (bbox_feature is False) & (extra_feature_edges is None):
+        mesh = generate_from_inr(
+            inr_filename,
+            lloyd,
+            odt,
+            perturb,
+            exude,
+            max_edge_size_at_feature_edges,
+            min_facet_angle,
+            max_radius_surface_delaunay_ball,
+            max_facet_distance,
+            max_circumradius_edge_ratio,
+            max_cell_circumradius,
+            verbose,
+            seed,
+        )
+    else :
+        mesh = generate_from_inr_with_features(
+            inr_filename,
+            extra_feature_edges,
+            bbox_feature,
+            lloyd,
+            odt,
+            perturb,
+            exude,
+            max_edge_size_at_feature_edges,
+            min_facet_angle,
+            max_radius_surface_delaunay_ball,
+            max_facet_distance,
+            max_circumradius_edge_ratio,
+            max_cell_circumradius,
+            verbose,
+            seed,
+        )
+
     os.remove(inr_filename)
     return mesh
+
+

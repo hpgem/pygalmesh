@@ -48,8 +48,12 @@ bool add_bounding_box(const CGAL::Image_3& image,
   domain.add_features(polylines_on_bbox.begin(), polylines_on_bbox.end());
 
 
-  for(const auto &point : polylines_on_bbox){
-      std::cout << point << std::endl;
+  for(const auto &line : polylines_on_bbox){
+      std::cout << "-------------" << std::endl;
+      for (const auto &point : line) {
+            std::cout << point << std::endl;
+      }
+      std::cout << "-------------" << std::endl;
   }
   return true;
 
